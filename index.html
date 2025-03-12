@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Private Music Player</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; background: #121212; color: white; }
+        h1 { color: #1DB954; }
+        .container { max-width: 400px; margin: auto; }
+        .playlist-item, .song-item { padding: 10px; margin: 5px; background: #333; cursor: pointer; border-radius: 5px; }
+        .playlist-item:hover, .song-item:hover { background: #1DB954; }
+        .controls { display: flex; justify-content: center; margin-top: 10px; }
+        .btn { background: #1DB954; color: white; border: none; padding: 10px; margin: 5px; cursor: pointer; border-radius: 5px; }
+        .btn:hover { background: #17a746; }
+        audio { width: 100%; margin-top: 20px; }
+    </style>
+</head>
+<body>
+    <h1>My Private Music</h1>
+    <div class="container">
+        <div id="playlists"></div>
+        <div id="songs"></div>
+        <audio id="audioPlayer" controls></audio>
+        <div class="controls">
+            <button class="btn" onclick="prevSong()">⏮ Prev</button>
+            <button class="btn" onclick="toggleShuffle()">🔀 Shuffle</button>
+            <button class="btn" onclick="nextSong()">⏭ Next</button>
+            <button class="btn" onclick="toggleRepeat()">🔁 Repeat</button>
+        </div>
+    </div>
+
+    <script>
+        const apiUrl = "https://music-player-backend-7sd9.onrender.com/"; // Change this after deployment
+        let currentPlaylist = [];
+        let currentIndex = 0;
+        let isShuffle = false;
+        let isRepeat = false;
+
+        async function fetchPlaylists() {
+            const res = await fetch(`${apiUrl}/playlists`);
+            const playlists = await res.json();
+            document.getElementById('playlists').innerHTML = playlists.map(p =>
+                `<div class="playlist-item" onclick="fetchSongs('${p}')">${p}</div>`).join('');
+        }
+
+        async function fetchSongs(playlist) {
+            const res = await fetch(`${apiUrl}/songs/${playlist}`);
+            currentPlaylist = await res.json();
+            currentIndex = 0;
+            document.getElementById('songs').innerHTML = currentPlaylist.map((song, i) =>
+                `<div class="song-item" onclick="playSong(${i})">${song.name}</div>`).join('');
+            playSong(0);
+        }
+
+        function playSong(index) {
+            currentIndex = index;
+            document.getElementById('audioPlayer').src = currentPlaylist[currentIndex].url;
+            document.getElementById('audioPlayer').play();
+        }
+
+        function nextSong() {
+            currentIndex = isShuffle ? Math.floor(Math.random() * currentPlaylist.length) : (currentIndex + 1) % currentPlaylist.length;
+            playSong(currentIndex);
+        }
+
+        function prevSong() {
+            currentIndex = (currentIndex - 1 + currentPlaylist.length) % currentPlaylist.length;
+            playSong(currentIndex);
+        }
+
+        function toggleShuffle() {
+            isShuffle = !isShuffle;
+            alert(`Shuffle: ${isShuffle ? "On" : "Off"}`);
+        }
+
+        function toggleRepeat() {
+            isRepeat = !isRepeat;
+            document.getElementById('audioPlayer').loop = isRepeat;
+            alert(`Repeat: ${isRepeat ? "On" : "Off"}`);
+        }
+
+        fetchPlaylists();
+    </script>
+</body>
+</html>
