@@ -83,19 +83,27 @@
             }
         }
 
-        // ✅ Play the selected song
         function playSong(index) {
-            if (currentPlaylist.length === 0) {
-                console.error("No songs available to play.");
-                return;
-            }
+    if (currentPlaylist.length === 0) {
+        console.error("No songs available to play.");
+        return;
+    }
 
-            currentIndex = index;
-            console.log("Playing song:", currentPlaylist[currentIndex]); // Debugging
+    currentIndex = index;
+    console.log("Playing song:", currentPlaylist[currentIndex]); // Debugging
 
-            document.getElementById('audioPlayer').src = currentPlaylist[currentIndex].url;
-            document.getElementById('audioPlayer').play();
-        }
+    const audioPlayer = document.getElementById('audioPlayer');
+    const songUrl = currentPlaylist[currentIndex].url;
+
+    // ✅ Convert Google Drive link to a direct streamable link
+    const googleDriveDirectUrl = songUrl.replace("https://drive.google.com/uc?export=download&id=12kAoDK4LlOMvNUCe3sRkaXgJoRbws4Sk", 
+                                                 "https://docs.google.com/uc?export=open&id=1qr17DNodkMnLE86soFgthsYiydDfuDOs");
+
+    console.log("Playing URL:", googleDriveDirectUrl);
+    audioPlayer.src = googleDriveDirectUrl;
+    audioPlayer.play();
+}
+
 
         // ✅ Play next song
         function nextSong() {
