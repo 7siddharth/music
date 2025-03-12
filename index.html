@@ -19,8 +19,8 @@
 <body>
     <h1>My Private Music</h1>
     <div class="container">
-        <div id="playlists"></div>
-        <div id="songs"></div>
+        <div id="playlists"></div>  <!-- 🔹 Playlists will be inserted here -->
+        <div id="songs"></div>  <!-- 🔹 Songs will be inserted here -->
         <audio id="audioPlayer" controls></audio>
         <div class="controls">
             <button class="btn" onclick="prevSong()">⏮ Prev</button>
@@ -33,73 +33,100 @@
     <script>
         const apiUrl = "https://music-player-backend-7sd9.onrender.com";
 
-
         let currentPlaylist = [];
         let currentIndex = 0;
         let isShuffle = false;
         let isRepeat = false;
 
+        // ✅ Fetch available playlists from the backend
         async function fetchPlaylists() {
             try {
-        console.log("Fetching songs from:", `${apiUrl}/songs/${playlist}`);
-                
-            const res = await fetch(`${apiUrl}/playlists`);
-            const playlists = await res.json();
+                console.log("Fetching playlists from:", `${apiUrl}/playlists`);
+                const res = await fetch(`${apiUrl}/playlists`);
+                const playlists = await res.json();
 
-                console.log("Fetched songs:", data); // Debugging output
-        
-        currentPlaylist = data;
-        currentIndex = 0;
-                
-            document.getElementById('songs').innerHTML = playlists.map((song, i) =>
-            `<div class="song-item" onclick="playSong(${i})">${song.name}</div>`
-        ).join('');
+                console.log("Fetched playlists:", playlists); // Debugging output
 
-            playSong(0);
-    } catch (error) {
-        console.error("Error fetching songs:", error);
+                document.getElementById('playlists').innerHTML = playlists.map(playlist =>
+                    `<div class="playlist-item" onclick="fetchSongs('${playlist}')">${playlist}</div>`
+                ).join('');
+            } catch (error) {
+                console.error("Error fetching playlists:", error);
+                document.getElementById('playlists').innerHTML = "<p>Error loading playlists.</p>";
+            }
         }
-        } 
 
+        // ✅ Fetch songs from the selected playlist
         async function fetchSongs(playlist) {
-            const res = await fetch(`${apiUrl}/songs/${playlist}`);
-            currentPlaylist = await res.json();
-            currentIndex = 0;
-            document.getElementById('songs').innerHTML = currentPlaylist.map((song, i) =>
-                `<div class="song-item" onclick="playSong(${i})">${song.name}</div>`).join('');
-            playSong(0);
-        }catch (error) {
-        console.error("Error fetching songs:", error);
-    } 
+            try {
+                console.log("Fetching songs from:", `${apiUrl}/songs/${playlist}`);
+                const res = await fetch(`${apiUrl}/songs/${playlist}`);
+                const data = await res.json();
+
+                if (!Array.isArray(data) || data.length === 0) {
+                    console.error("No songs found in playlist:", playlist);
+                    document.getElementById('songs').innerHTML = "<p>No songs available.</p>";
+                    return;
+                }
+
+                currentPlaylist = data;
+                currentIndex = 0;
+
+                document.getElementById('songs').innerHTML = currentPlaylist.map((song, i) =>
+                    `<div class="song-item" onclick="playSong(${i})">${song.name}</div>`
+                ).join('');
+
+                playSong(0);
+            } catch (error) {
+                console.error("Error fetching songs:", error);
+                document.getElementById('songs').innerHTML = "<p>Error loading songs.</p>";
+            }
         }
 
+        // ✅ Play the selected song
         function playSong(index) {
+            if (currentPlaylist.length === 0) {
+                console.error("No songs available to play.");
+                return;
+            }
+
             currentIndex = index;
+            console.log("Playing song:", currentPlaylist[currentIndex]); // Debugging
+
             document.getElementById('audioPlayer').src = currentPlaylist[currentIndex].url;
             document.getElementById('audioPlayer').play();
         }
 
+        // ✅ Play next song
         function nextSong() {
-            currentIndex = isShuffle ? Math.floor(Math.random() * currentPlaylist.length) : (currentIndex + 1) % currentPlaylist.length;
+            if (isShuffle) {
+                currentIndex = Math.floor(Math.random() * currentPlaylist.length);
+            } else {
+                currentIndex = (currentIndex + 1) % currentPlaylist.length;
+            }
             playSong(currentIndex);
         }
 
+        // ✅ Play previous song
         function prevSong() {
             currentIndex = (currentIndex - 1 + currentPlaylist.length) % currentPlaylist.length;
             playSong(currentIndex);
         }
 
+        // ✅ Toggle Shuffle
         function toggleShuffle() {
             isShuffle = !isShuffle;
             alert(`Shuffle: ${isShuffle ? "On" : "Off"}`);
         }
 
+        // ✅ Toggle Repeat
         function toggleRepeat() {
             isRepeat = !isRepeat;
             document.getElementById('audioPlayer').loop = isRepeat;
             alert(`Repeat: ${isRepeat ? "On" : "Off"}`);
         }
 
+        // 🔹 Load playlists on page load
         fetchPlaylists();
     </script>
 </body>
