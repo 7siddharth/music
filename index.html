@@ -45,7 +45,7 @@
                 const res = await fetch(`${apiUrl}/playlists`);
                 const playlists = await res.json();
 
-                console.log("Fetched playlists:", playlists); // Debugging output
+                console.log("Fetched playlists:", playlists);
 
                 document.getElementById('playlists').innerHTML = playlists.map(playlist =>
                     `<div class="playlist-item" onclick="fetchSongs('${playlist}')">${playlist}</div>`
@@ -83,27 +83,35 @@
             }
         }
 
+        // ✅ Play selected song
         function playSong(index) {
-    if (currentPlaylist.length === 0) {
-        console.error("No songs available to play.");
-        return;
-    }
+            if (currentPlaylist.length === 0) {
+                console.error("No songs available to play.");
+                return;
+            }
 
-    currentIndex = index;
-    console.log("Playing song:", currentPlaylist[currentIndex]); // Debugging
+            currentIndex = index;
+            console.log("Playing song:", currentPlaylist[currentIndex]);
 
-    const audioPlayer = document.getElementById('audioPlayer');
-    const songUrl = currentPlaylist[currentIndex].url;
+            const audioPlayer = document.getElementById('audioPlayer');
+            const songUrl = currentPlaylist[currentIndex].url;
 
-    // ✅ Convert Google Drive link to a direct streamable link
-    const googleDriveDirectUrl = songUrl.replace("https://drive.google.com/uc?export=download&id=12kAoDK4LlOMvNUCe3sRkaXgJoRbws4Sk", 
-                                                 "https://docs.google.com/uc?export=open&id=1qr17DNodkMnLE86soFgthsYiydDfuDOs");
+            console.log("Playing URL:", songUrl);
+            audioPlayer.src = songUrl;
+            audioPlayer.play();
 
-    console.log("Playing URL:", googleDriveDirectUrl);
-    audioPlayer.src = googleDriveDirectUrl;
-    audioPlayer.play();
-}
-
+            // ✅ Play next song when the current one ends
+            audioPlayer.onended = function () {
+                if (isRepeat) {
+                    playSong(currentIndex); // Repeat same song
+                } else if (isShuffle) {
+                    currentIndex = Math.floor(Math.random() * currentPlaylist.length); // Play random song
+                    playSong(currentIndex);
+                } else {
+                    nextSong(); // Play next song normally
+                }
+            };
+        }
 
         // ✅ Play next song
         function nextSong() {
@@ -130,7 +138,6 @@
         // ✅ Toggle Repeat
         function toggleRepeat() {
             isRepeat = !isRepeat;
-            document.getElementById('audioPlayer').loop = isRepeat;
             alert(`Repeat: ${isRepeat ? "On" : "Off"}`);
         }
 
