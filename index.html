@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Music Player</title>
+  <link rel="stylesheet" href="styles.css"/>
+</head>
+<body>
+  <div id="app">
+    <!-- Playlist view -->
+    <section id="playlist-view">
+      <h1>Playlists</h1>
+      <ul id="playlists"></ul>
+    </section>
+
+    <!-- Songs view (hidden initially) -->
+    <section id="songs-view" class="hidden">
+      <button id="back-btn">← Back to Playlists</button>
+      <h1 id="current-playlist-title"></h1>
+      <ul id="songs"></ul>
+    </section>
+
+    <!-- Audio player -->
+    <div id="player">
+      <audio id="audio" controls></audio>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
