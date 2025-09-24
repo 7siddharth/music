@@ -15,30 +15,26 @@
     }
 
     h1 {
-  font-size: 2.8rem;
-  margin: 25px 0;
-  font-weight: 800;
-  
-  background: linear-gradient(to right, #00c6ff, #0072ff);
-  background-clip: text;
-  -webkit-background-clip: text;
-  
-  color: #fff; /* fallback color */
-  -webkit-text-fill-color: initial; /* keep real fill visible */
-}
+      font-size: 2.8rem;
+      margin: 25px 0;
+      font-weight: 800;
+      background: linear-gradient(to right, #00c6ff, #0072ff);
+      background-clip: text;
+      -webkit-background-clip: text;
+      color: #fff; /* fallback color */
+      -webkit-text-fill-color: initial; /* keep real fill visible */
+    }
 
-    
     .emoji {
-  font-family: 'Segoe UI Emoji', 'Noto Color Emoji', sans-serif;
-  font-size: 1.4em;
-  line-height: 1;
-  color: #ffffff; /* Force white emoji */
-  background: none;
-  padding: 0;
-  margin: 0;
-  vertical-align: middle;
-}
-
+      font-family: 'Segoe UI Emoji', 'Noto Color Emoji', sans-serif;
+      font-size: 1.4em;
+      line-height: 1;
+      color: #ffffff; /* Force white emoji */
+      background: none;
+      padding: 0;
+      margin: 0;
+      vertical-align: middle;
+    }
 
     .container {
       max-width: 650px;
@@ -122,8 +118,6 @@
   Sid <span class="emoji">🎼</span> Wave <span class="emoji">🪽</span>
 </h1>
 
-
-
   <div class="container">
     <div id="playlists"></div>
     <div id="songs"></div>
@@ -185,8 +179,28 @@
       if (currentPlaylist.length === 0) return;
       currentIndex = index;
       const audioPlayer = document.getElementById('audioPlayer');
-      audioPlayer.src = currentPlaylist[currentIndex].url;
+      const song = currentPlaylist[currentIndex];
+
+      audioPlayer.src = song.url;
       audioPlayer.play();
+
+      // ✅ Media Session API for toolbar controls + song title
+      if ("mediaSession" in navigator) {
+        navigator.mediaSession.metadata = new MediaMetadata({
+          title: song.name,
+          artist: "Sid Wave",
+          album: "My Playlist",
+          artwork: [
+            { src: "https://via.placeholder.com/192", sizes: "192x192", type: "image/png" }
+          ]
+        });
+
+        navigator.mediaSession.setActionHandler("nexttrack", nextSong);
+        navigator.mediaSession.setActionHandler("previoustrack", prevSong);
+        navigator.mediaSession.setActionHandler("play", () => audioPlayer.play());
+        navigator.mediaSession.setActionHandler("pause", () => audioPlayer.pause());
+      }
+
       audioPlayer.onended = function () {
         if (isRepeat) {
           playSong(currentIndex);
